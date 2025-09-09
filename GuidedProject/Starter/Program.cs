@@ -1,4 +1,4 @@
-
+// I forgot to switch terminal to challenge project all my updates were done here in guided project my mistake! :(
 // the ourAnimals array will store the following: 
 string animalSpecies = "";
 string animalID = "";
