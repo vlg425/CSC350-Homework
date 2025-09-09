@@ -10,6 +10,10 @@ string animalNickname = "";
 int maxPets = 8;
 string? readResult;
 string menuSelection = "";
+int petCount = 0;
+string anotherPet = 'y';
+bool validEntry = false;
+int petage = 0; 
 
 // array used to store runtime data, there is no persisted data
 string[,] ourAnimals = new string[maxPets, 6];
@@ -124,8 +128,8 @@ do
 
         case "2":
             // Add a new animal friend to the ourAnimals array
-            string anotherPet = "y";
-            int petCount = 0;
+            anotherPet = "y";
+            petCount = 0;
             for (int i = 0; i < maxPets; i++)
             {
                 if (ourAnimals[i, 0] != "ID #: ")
@@ -140,7 +144,6 @@ do
                 Console.WriteLine($"We currently have {petCount} pets that need homes. We can manage {(maxPets - petCount)} more.");
             }
 
-            bool validEntry = false;
             // get species (cat or dog) - string animalSpecies is a required field 
             do
             {
@@ -167,7 +170,6 @@ do
             // get the pet's age. can be ? at initial entry. 
             do
             {
-                int petAge;
                 Console.WriteLine("Enter the pet's age or enter ? if unknown");
                 readResult = Console.ReadLine();
                 if (readResult != null)
@@ -265,7 +267,6 @@ do
                 Console.WriteLine("Press the Enter key to continue.");
                 readResult = Console.ReadLine();
             }
-
 
             break;
 
