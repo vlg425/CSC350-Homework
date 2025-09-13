@@ -4,81 +4,101 @@
 // Homework 3 - Card, Deck, Dice
 //************************************************************************
 
+using System.Security.Cryptography.X509Certificates;
 using Cards2;
-using System;
 
-public class Dice
+public class Player
 {
-    private int numOfSides; //number of sides on the dice
-    private int topSide; //the side that is currently on top
+    public int PlayerNumber { get; set; }
+    public int Roll { get; set; }
 
-    //default constructor, 6 sides
-    public Dice()
+    public Player(int n)
     {
-        numOfSides = 6;
-        topSide = 1;
-    }
-
-    public Dice(int numOfSides)
-    {
-        if (numOfSides < 2)  //coin flip smallest kind of dice?
-        {
-            numOfSides = 6;
-        }
-        this.numOfSides = numOfSides;
-        topSide = 1;
-    }
-
-    public void Roll()
-    {
-        Random rand = new Random();
-        topSide = rand.Next(1, numOfSides + 1);
-
-        if (topSide < 1 || topSide > numOfSides)
-        {
-            topSide = 1;
-        }
-
-    }
-
-    public int TopSide { get { return topSide; } }
-
-    public int NumOfSides(int numOfSides)
-    {
-        return numOfSides;
+        PlayerNumber = n;
+        Roll = 0;
     }
 }
 
-public class Program
+
+
+public class CardDeckDice
 {
+    public static void RollForDealer(int numberOfPlayers)
+    {
+        Dice dice = new Dice(2);
+        List<Player> players = new List<Player>();
+        for (int i = 1; i <= numberOfPlayers; i++) players.Add(new Player(i));
+
+        // Start with all players as dealer
+        List<Player> dealer = new List<Player>(players);
+
+        Console.WriteLine("-----------------------------------");
+        Console.WriteLine("Rolling for dealer...");
+        Console.WriteLine("-----------------------------------");
+
+        while (true)
+        {
+            int highest = 0;
+
+            // Roll and announce for each player in dealer
+            for (int i = 0; i < dealer.Count; i++)
+            {
+                dice.Roll();
+                dealer[i].Roll = dice.TopSide;
+                Console.WriteLine($"Player {dealer[i].PlayerNumber} rolls {dealer[i].Roll}");
+                if (dealer[i].Roll > highest)
+                    highest = dealer[i].Roll;
+            }
+
+            // Keep only those who matched the highest
+            List<Player> tied = new List<Player>();
+            for (int i = 0; i < dealer.Count; i++)
+            {
+                if (dealer[i].Roll == highest)
+                    tied.Add(dealer[i]);
+            }
+
+            if (tied.Count == 1)
+            {
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine($"Player {tied[0].PlayerNumber} is the dealer.");
+                Console.WriteLine("-----------------------------------");
+                return; // done
+            }
+
+            // Tie: announce and prepare the next round with only tied players
+            Console.WriteLine("-----------------------------------");
+            Console.Write($"Player ");
+            for (int i = 0; i < tied.Count; i++)
+            {
+                Console.Write(tied[i].PlayerNumber);
+                if (i < tied.Count - 1) Console.Write(" and ");
+                tied[i].Roll = 0; // reset for next roll
+            }
+            Console.WriteLine(" tied with 6! ReRoll:");
+            Console.WriteLine("-----------------------------------");
+
+            dealer = tied; // next round: only tied players
+        }
+    }
+
+
     public static void Main(string[] args)
     {
-        // Create and roll a 6-sided dice
-        Dice dice = new Dice(6);
-        dice.Roll();
-        Console.WriteLine($"Rolled a {dice.TopSide} on a {dice.NumOfSides(6)}-sided dice.");
+        int numberOfPlayers = 4;
+        RollForDealer(numberOfPlayers);
 
-        // Create and roll a 20-sided dice
-        Dice d20 = new Dice(20);
-        d20.Roll();
-        Console.WriteLine($"Rolled a {d20.TopSide} on a {d20.NumOfSides(20)}-sided dice.");
-
-        // Create and display a deck of cards
-        Deck deck = new Deck();
-        deck.Shuffle();
-        Console.WriteLine("Dealt 5 cards from the deck:");
-        for (int i = 0; i < 5; i++)
-        {
-            Card card = deck.TakeTopCard();
-            if (card != null)
-            {
-                Console.WriteLine(card);
-            }
-            else
-            {
-                Console.WriteLine("No more cards in the deck.");
-            }
-        }
-        
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
