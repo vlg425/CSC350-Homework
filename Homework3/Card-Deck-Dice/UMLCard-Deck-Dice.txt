@@ -1,0 +1,13 @@
+//----------------------------
+// Dice()
+//----------------------------
+// -numOfSides: int             //number of sides on the dice
+// -topSide: int                //the side that is currently on top
+//----------------------------
+// +Dice()                      //default constructor, 6 sides
+// +Dice(int)                   //overloaded constructor, custom sides
+// +Roll()                      //rolls the dice
+// +TopSide: int                // property for top side
+// +NumOfSides: int             // property for number of sides
+//
+//----------------------------
