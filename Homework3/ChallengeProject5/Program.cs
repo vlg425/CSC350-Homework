@@ -32,6 +32,9 @@ InitializeGame();
 // Set this to true to enable termination on nondirectional key input
 bool terminateOnNondirectional = true;
 
+// Set this to true to enable the speed boost feature
+bool enableSpeedBoost = true;
+
 while (!shouldExit)
 {
     // Check for terminal resize before each move
@@ -42,7 +45,28 @@ while (!shouldExit)
         shouldExit = true;
         break;
     }
-    Move(terminateOnNondirectional);
+
+    // If the player should be frozen, freeze them and skip the rest of the loop
+    if (player == "(X_X)")
+    {
+        // freeze the player for a second and reset to normal
+        System.Threading.Thread.Sleep(1000);
+        player = "('-')";
+        continue;
+    }
+
+    // Set movement speed to 1 by default
+    int moveSpeed = 1;
+    // If speed boost is enabled and player looks like (^-^), set speed to 3
+    if (enableSpeedBoost)
+    {
+        if (player == "(^-^)")
+        {
+            moveSpeed = 3;
+        }
+    }
+
+    Move(terminateOnNondirectional, moveSpeed);
 
     // Check if player consumed the food
     if (PlayerConsumedFood())
@@ -96,15 +120,8 @@ void ChangePlayer()
     Console.Write(player);
 }
 
-// Temporarily stops the player from moving
-void FreezePlayer() 
-{
-    System.Threading.Thread.Sleep(1000);
-    player = states[0];
-}
-
 // Reads directional input from the Console and moves the player
-void Move(bool terminateOnNondirectional)
+void Move(bool terminateOnNondirectional, int moveSpeed)
 {
     int lastX = playerX;
     int lastY = playerY;
