@@ -1,4 +1,9 @@
-﻿using System;
+﻿//*********************
+//Victor Garcia
+//CSC 350 - Homework 3
+//Challenge Project 5
+//*********************
+
 Random random = new Random();
 Console.CursorVisible = false;
 int height = Console.WindowHeight - 1;
@@ -25,7 +30,7 @@ int food = 0;
 
 InitializeGame();
 // Set this to true to enable termination on nondirectional key input
-bool terminateOnNondirectional = false;
+bool terminateOnNondirectional = true;
 
 while (!shouldExit)
 {
@@ -38,6 +43,28 @@ while (!shouldExit)
         break;
     }
     Move(terminateOnNondirectional);
+
+    // Check if player consumed the food
+    if (PlayerConsumedFood())
+    {
+        ChangePlayer();
+        ShowFood();
+    }
+}
+// Returns true if the player has consumed the food
+bool PlayerConsumedFood()
+{
+    // Check if the player's position overlaps with the food's position
+    // The player and food are both strings, so check if any part of the player overlaps the food horizontally
+    // (Assume vertical overlap is just Y coordinate match)
+    for (int i = 0; i < player.Length; i++)
+    {
+        if ((playerX + i) >= foodX && (playerX + i) < (foodX + foods[food].Length) && playerY == foodY)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Returns true if the Terminal was resized 
