@@ -1,5 +1,4 @@
 ﻿using System;
-
 Random random = new Random();
 Console.CursorVisible = false;
 int height = Console.WindowHeight - 1;
@@ -25,9 +24,20 @@ string player = states[0];
 int food = 0;
 
 InitializeGame();
-while (!shouldExit) 
+// Set this to true to enable termination on nondirectional key input
+bool terminateOnNondirectional = false;
+
+while (!shouldExit)
 {
-    Move();
+    // Check for terminal resize before each move
+    if (TerminalResized())
+    {
+        Console.Clear();
+        Console.WriteLine("Console was resized. Program exiting.");
+        shouldExit = true;
+        break;
+    }
+    Move(terminateOnNondirectional);
 }
 
 // Returns true if the Terminal was resized 
@@ -67,33 +77,45 @@ void FreezePlayer()
 }
 
 // Reads directional input from the Console and moves the player
-void Move() 
+void Move(bool terminateOnNondirectional)
 {
     int lastX = playerX;
     int lastY = playerY;
     
-    switch (Console.ReadKey(true).Key) 
+    bool isDirectional = false;
+    switch (Console.ReadKey(true).Key)
     {
         case ConsoleKey.UpArrow:
-            playerY--; 
+            playerY--;
+            isDirectional = true;
             break;
-		case ConsoleKey.DownArrow: 
-            playerY++; 
+        case ConsoleKey.DownArrow:
+            playerY++;
+            isDirectional = true;
             break;
-		case ConsoleKey.LeftArrow:  
-            playerX--; 
+        case ConsoleKey.LeftArrow:
+            playerX--;
+            isDirectional = true;
             break;
-		case ConsoleKey.RightArrow: 
-            playerX++; 
+        case ConsoleKey.RightArrow:
+            playerX++;
+            isDirectional = true;
             break;
-		case ConsoleKey.Escape:     
-            shouldExit = true; 
+        case ConsoleKey.Escape:
+            shouldExit = true;
             break;
+    }
+
+    // If enabled, terminate on nondirectional key input
+    if (terminateOnNondirectional && !isDirectional && Console.ReadKey(true).Key != ConsoleKey.Escape)
+    {
+        shouldExit = true;
+        return;
     }
 
     // Clear the characters at the previous position
     Console.SetCursorPosition(lastX, lastY);
-    for (int i = 0; i < player.Length; i++) 
+    for (int i = 0; i < player.Length; i++)
     {
         Console.Write(" ");
     }
