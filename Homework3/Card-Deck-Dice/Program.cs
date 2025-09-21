@@ -21,7 +21,7 @@ public class CardDeckDice
     }
     public static int RollForDealer(int numberOfPlayers)
     {
-        Dice dice = new Dice(2);
+        Dice dice = new Dice();
         List<Player> players = new List<Player>();
         for (int i = 1; i <= numberOfPlayers; i++) players.Add(new Player(i));
 
