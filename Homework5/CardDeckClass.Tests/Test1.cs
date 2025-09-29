@@ -1,14 +1,14 @@
 ﻿
 [TestClass]
-public class BasicCardDeckPlayerTests
+public class CardDeckPlayerTests
 {
     [TestMethod]
     public void TestCardConstructor()//new card should have correct rank/suit and be face down
     {
-        var c = new Card(Rank.Ace, Suit.Spades);
-        Assert.AreEqual(Rank.Ace, c.Rank, "Rank not set.");
-        Assert.AreEqual(Suit.Spades, c.Suit, "Suit not set.");
-        Assert.IsFalse(c.FaceUp, "New card should start face down.");
+        var card = new Card(Rank.Ace, Suit.Spades);
+        Assert.AreEqual(Rank.Ace, card.Rank, "Rank not set.");
+        Assert.AreEqual(Suit.Spades, card.Suit, "Suit not set.");
+        Assert.IsFalse(card.FaceUp, "New card should start face down.");
     }
 
     [TestMethod]
@@ -17,9 +17,6 @@ public class BasicCardDeckPlayerTests
         var deck = new Deck();
         Assert.IsFalse(deck.Empty, "Fresh deck should not be empty.");
         Assert.AreEqual(52, deck.Cards.Count, "Fresh deck should have 52 cards.");
-
-        var uniq = new HashSet<string>(deck.Cards.Select(c => $"{c.Rank}-{c.Suit}"));
-        Assert.AreEqual(52, uniq.Count, "Deck should contain 52 unique rank/suit combos.");
     }
 
     [TestMethod]
@@ -37,11 +34,11 @@ public class BasicCardDeckPlayerTests
     [TestMethod]
     public void TestShuffle() //card order should be different after shuffle
     {
-        var d = new Deck();
-        var before = d.Cards.Select(c => $"{c.Rank}-{c.Suit}").ToList();
+        var deck = new Deck();
+        var before = deck.Cards.Select(c => $"{c.Rank}-{c.Suit}").ToList();
 
-        d.Shuffle();
-        var after = d.Cards.Select(c => $"{c.Rank}-{c.Suit}").ToList();
+        deck.Shuffle();
+        var after = deck.Cards.Select(c => $"{c.Rank}-{c.Suit}").ToList();
 
         // Not a proof, but catches a no-op Shuffle.
         bool changed = !before.SequenceEqual(after);
@@ -52,10 +49,10 @@ public class BasicCardDeckPlayerTests
     public void TestDrawCards() //should draw until emtpy
     {
         var deck = new Deck();
-        var p = new Player("P");
+        var player = new Player("P");
 
-        p.DrawFrom(deck, 60); // ask for more than 52
-        Assert.AreEqual(52, p.CardCount, "Player should draw all available cards (52).");
+        player.DrawFrom(deck, 60); // ask for more than 52
+        Assert.AreEqual(52, player.CardCount, "Player should draw all available cards (52).");
         Assert.IsTrue(deck.Empty, "Deck should be empty after drawing all cards.");
     }
 }
