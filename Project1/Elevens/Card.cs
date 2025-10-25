@@ -1,32 +1,31 @@
+
+
 public class Card
 {
-    // Properties for the card's rank, suit, and visibility
-    public Rank Rank { get; }
-    public Suit Suit { get; }
-    public bool FaceUp { get; private set; }
+    //Fields, example: Rank rank;
+    //check the help documentation for the fields
+    Rank rank;
+    Suit suit;
+    bool faceUp;
 
-    // Calculates the point value for the game of Elevens
-    // Number cards are their number, Ace is 1, and J, Q, K are 0.
-    public int PointValue =>
-        Rank >= Rank.Ace && Rank <= Rank.Ten ? (int)Rank + 1 : 0;
-
-    // Constructor to initialize a new card
+    //Card Constructor
     public Card(Rank rank, Suit suit)
     {
-        Rank = rank;
-        Suit = suit;
-        FaceUp = false; // Cards are created face down
+        //implementation
+        this.rank = rank;
+        this.suit = suit;
     }
 
-    // Flips the card's visibility
+    //Define properties for all above fields
+    //code example: public Suit Suit { get { return suit; } }
+    public Rank Rank{ get{ return rank; } }
+    public Suit Suit{ get{ return suit; } }   
+    public bool FaceUp{ get{ return faceUp; } }
+
     public void FlipOver()
     {
-        FaceUp = !FaceUp;
+        //implementation 
+        faceUp = !faceUp;
     }
-
-    // Provides a readable string for the card, e.g., "Ace of Spades"
-    public override string ToString()
-    {
-        return $"{Rank} of {Suit}";
-    }
+        
 }

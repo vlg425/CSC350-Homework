@@ -1,44 +1,51 @@
+
 public class Deck
 {
-    private List<Card> cards;
-    private static readonly Random Rng = new Random();
+    List<Card> cards = new List<Card>();
 
-    // Checks if the deck has run out of cards
-    public bool IsEmpty => cards.Count == 0;
-
-    // Constructor creates a full, ordered 52-card deck
+    //Deck Constructor
     public Deck()
     {
-        cards = new List<Card>();
         foreach (Suit suit in Enum.GetValues(typeof(Suit)))
         {
             foreach (Rank rank in Enum.GetValues(typeof(Rank)))
             {
+                //create a new card and add it to the deck
                 cards.Add(new Card(rank, suit));
             }
         }
     }
 
-    // Shuffles the deck using the Fisher-Yates algorithm
-    public void Shuffle()
-    {
-        for (int n = cards.Count - 1; n > 0; --n)
-        {
-            int k = Rng.Next(n + 1);
-            // Swap the cards
-            (cards[k], cards[n]) = (cards[n], cards[k]);
-        }
-    }
+    //Implement a property to get Cards
+    public List<Card> Cards { get { return cards; } }
 
-    // Removes and returns the top card from the deck
+    //Implement a property to check if deck is empty
+    public bool Empty { get { return cards.Count == 0; } }
+
+
+    //Takes top card from deck (if deck is not empty, otherwise return null)
     public Card TakeTopCard()
     {
-        if (IsEmpty)
-        {
-            return null; // Return null if the deck is empty
-        }
-        Card topCard = cards[cards.Count - 1];
-        cards.RemoveAt(cards.Count - 1);
+        //implementation
+        if (Empty) return null;
+        Card topCard = cards[0];
+        cards.RemoveAt(0);
         return topCard;
     }
+
+    //Shuffle Method
+    public void Shuffle()
+    {
+        //implementation
+        Random random = new Random();
+        int idx = cards.Count;
+        while (idx > 1)
+        {
+            int temp = random.Next(idx--);
+            Card swap = cards[idx];
+            cards[idx] = cards[temp];
+            cards[temp] = swap;
+        }
+    }
 }
+
