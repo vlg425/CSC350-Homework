@@ -1,31 +1,19 @@
-
-
 public class Card
 {
-    //Fields, example: Rank rank;
-    //check the help documentation for the fields
-    Rank rank;
-    Suit suit;
-    bool faceUp;
+    // Properties
+    public Rank Rank { get; }
+    public Suit Suit { get; }
 
-    //Card Constructor
+
+    // Card Constructor
     public Card(Rank rank, Suit suit)
     {
-        //implementation
-        this.rank = rank;
-        this.suit = suit;
+        this.Rank = rank;
+        this.Suit = suit;
     }
-
-    //Define properties for all above fields
-    //code example: public Suit Suit { get { return suit; } }
-    public Rank Rank{ get{ return rank; } }
-    public Suit Suit{ get{ return suit; } }   
-    public bool FaceUp{ get{ return faceUp; } }
-
-    public void FlipOver()
+    // Returns string representation of the card
+    public override string ToString()
     {
-        //implementation 
-        faceUp = !faceUp;
+        return $"{Rank} of {Suit}";
     }
-        
 }

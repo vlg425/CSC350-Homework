@@ -1,75 +1,59 @@
-
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Elevens
 {
     public class MoveValidator
     {
-        // IsValidPairSum11 – True if two cards add to 11
+        // Renamed and fixed: Checks if two NON-FACE cards add up to 11
         public bool IsValidPairSum11(Card a, Card b)
         {
-            return (GetCardValue(a) + GetCardValue(b)) == 11;
-        }
-
-        // IsValidJQK – True if 3 cards are J, Q, K
-        public bool IsValidJQK(List<Card> triple)
-        {
-            bool hasJ = false, hasQ = false, hasK = false;
-            foreach (var card in triple)
+            // Rule: A Jack, Queen, or King can NEVER be part of a sum-to-11 pair.
+            if (a.Rank >= Rank.Jack || b.Rank >= Rank.Jack)
             {
-                if (card.Rank == Rank.Jack) hasJ = true;
-                else if (card.Rank == Rank.Queen) hasQ = true;
-                else if (card.Rank == Rank.King) hasK = true;
+                return false;
             }
-            return hasJ && hasQ && hasK;
+
+            // If they are not face cards, check their sum.
+            return ((int)a.Rank + (int)b.Rank) == 11;
         }
 
-        // Returns true if any legal move exists on the board
+        // Checks if three cards are a Jack, Queen, and King
+        public bool IsValidJQK(List<Card> cards)
+        {
+            if (cards.Count != 3) return false;
+
+            var ranks = cards.Select(c => c.Rank).ToHashSet();
+            return ranks.Contains(Rank.Jack) &&
+                   ranks.Contains(Rank.Queen) &&
+                   ranks.Contains(Rank.King);
+        }
+
+        // Checks if any legal move exists on the board
         public bool HasAnyValidMove(List<Card> cards)
         {
-            // check pairs for sum 11
+            // Check all pairs for a sum of 11
             for (int i = 0; i < cards.Count; i++)
             {
                 for (int j = i + 1; j < cards.Count; j++)
                 {
-                    if (IsValidPairSum11(cards[i], cards[j])) return true;
-                }
-            }
-
-            // check triples for JQK
-            int n = cards.Count;
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = i + 1; j < n; j++)
-                {
-                    for (int k = j + 1; k < n; k++)
+                    if (IsValidPairSum11(cards[i], cards[j]))
                     {
-                        var triple = new List<Card> { cards[i], cards[j], cards[k] };
-                        if (IsValidJQK(triple)) return true;
+                        return true;
                     }
                 }
             }
 
-            return false;
-        }
-
-        // Helper method to get card value
-        private int GetCardValue(Card card)
-        {
-            switch (card.Rank)
+            // Check if a J, Q, and K are all present
+            var ranksOnBoard = cards.Select(c => c.Rank).ToHashSet();
+            if (ranksOnBoard.Contains(Rank.Jack) &&
+                ranksOnBoard.Contains(Rank.Queen) &&
+                ranksOnBoard.Contains(Rank.King))
             {
-                case Rank.Ace: return 1;
-                case Rank.Two: return 2;
-                case Rank.Three: return 3;
-                case Rank.Four: return 4;
-                case Rank.Five: return 5;
-                case Rank.Six: return 6;
-                case Rank.Seven: return 7;
-                case Rank.Eight: return 8;
-                case Rank.Nine: return 9;
-                case Rank.Ten: return 10;
-                default: return 0; // J, Q, K have no value for sum 11
+                return true;
             }
+
+            return false;
         }
     }
 }
