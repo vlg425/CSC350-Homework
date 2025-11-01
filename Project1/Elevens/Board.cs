@@ -1,33 +1,43 @@
-
 using System.Collections.Generic;
 
 namespace Elevens
 {
+    // Represents the game board, which holds up to 9 cards.
     public class Board
     {
-        // Fields
+        // --- Fields ---
+
+        // The list of cards currently visible on the board
         private List<Card> cardsOnBoard;
+        
+        // The target number of cards to have on the board
         private const int size = 9;
 
-        // Board Constructor
+        // --- Constructor ---
+
+        // Initializes a new, empty board.
         public Board()
         {
             cardsOnBoard = new List<Card>();
         }
 
-        // Desired number of cards (9)
+        // --- Properties ---
+
+        // The desired number of cards on the board (always 9).
         public int Size { get { return size; } }
 
-        // Number of cards currently on the board
+        // The number of cards *currently* on the board.
         public int Count { get { return cardsOnBoard.Count; } }
 
-        // Deals up to 9 cards from the deck
+        // --- Public Methods ---
+
+        // Deals the initial set of cards to fill the board.
         public void DealInitial(Deck deck)
         {
             Refill(deck);
         }
 
-        // Removes selected cards from the board
+        // Removes a list of selected cards from the board.
         public void Discard(List<Card> selected)
         {
             foreach (var card in selected)
@@ -36,36 +46,37 @@ namespace Elevens
             }
         }
 
-        // Adds cards until board has 9 or deck is empty
+        // Adds cards from the deck until the board has 9 cards or the deck is empty.
         public void Refill(Deck deck)
         {
+            // Keep dealing while the board isn't full AND the deck isn't empty
             while (cardsOnBoard.Count < size && !deck.Empty)
             {
-                Card newCard = deck.TakeTopCard();
-                if (newCard != null)
+                Card? newCard = deck.TakeTopCard();
+                if (newCard != null) // Check if TakeTopCard didn't return null
                 {
                     cardsOnBoard.Add(newCard);
                 }
             }
         }
 
-        // Checks if the board currently has a given card
+        // Checks if a specific card is currently on the board.
         public bool CheckForCard(Card card)
         {
             return cardsOnBoard.Contains(card);
         }
 
-        // Empties board
+        // Empties all cards from the board.
         public void ClearBoard()
         {
             cardsOnBoard.Clear();
         }
 
-        // Returns a list of all cards currently on the board
+        // Returns a new list containing all cards currently on the board.
         public List<Card> GetCards()
         {
+            // Returns a *copy* to prevent other classes from modifying the board's list
             return new List<Card>(cardsOnBoard);
         }
     }
 }
-

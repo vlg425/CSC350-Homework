@@ -1,3 +1,5 @@
+// Defines the possible ranks for a card, with their integer values.
+// Ace is 1, Jack is 11, Queen is 12, King is 13.
 public enum Rank : int
 {
     Ace = 1,

@@ -3,15 +3,29 @@ using System.Text;
 
 namespace Elevens
 {
+    // Manages the core game logic, state, and rules for Elevens.
     public class Game
     {
-        // ... (properties remain the same) ...
+        // --- Properties ---
+
+        // The deck of cards used for the game.
         public Deck deck { get; private set; }
+
+        // The 9-card board where plays are made.
         public Board board { get; private set; }
+
+        // Flag to indicate if the game has ended.
         public bool gameOver { get; private set; }
+
+        // Flag to indicate if the player won the game.
         public bool playerWon { get; private set; }
+
+        // Helper class to check if moves are valid.
         private MoveValidator moveValidator;
 
+        // --- Constructor ---
+
+        // Initializes a new game instance.
         public Game()
         {
             deck = new Deck();
@@ -21,7 +35,9 @@ namespace Elevens
             playerWon = false;
         }
         
-        // ... (StartNewGame remains the same) ...
+        // --- Public Methods ---
+
+        // Resets the game to a new, shuffled state.
         public void StartNewGame()
         {
             deck = new Deck();
@@ -30,55 +46,41 @@ namespace Elevens
             board.DealInitial(deck);
             gameOver = false;
             playerWon = false;
-            if (!moveValidator.HasAnyValidMove(board.GetCards()))
-            {
-                gameOver = true;
-                playerWon = false;
-            }
+            
+            // Check the board immediately in case there are no moves on the first deal.
+            CheckForWin();
         }
 
-        // Tries to play the user's selected cards
+        // Attempts to play the cards selected by the user.
         public bool TryPlaySelected(List<Card> selected)
         {
             bool isValidMove = false;
             
-            // FIXED: Call the corrected IsValidPairSum11 method
+            // Check if it's a valid pair summing to 11
             if (selected.Count == 2 && moveValidator.IsValidPairSum11(selected[0], selected[1]))
             {
                 isValidMove = true;
             }
+            // Check if it's a valid J-Q-K set
             else if (selected.Count == 3 && moveValidator.IsValidJQK(selected))
             {
                 isValidMove = true;
             }
 
+            // If the move is valid, update the board and check the game state
             if (isValidMove)
             {
                 board.Discard(selected);
                 board.Refill(deck);
-                CheckForWin();
+                CheckForWin(); // Check for a win/loss after refilling
                 return true;
             }
+
+            // If the move was not valid, return false
             return false;
         }
-
-        // ... (CheckForWin and DisplayBoard remain the same) ...
-        private void CheckForWin()
-        {
-            if (board.Count == 0 && deck.Empty)
-            {
-                gameOver = true;
-                playerWon = true;
-            }
-            else if (deck.Empty && !moveValidator.HasAnyValidMove(board.GetCards()))
-            {
-                gameOver = true;
-                playerWon = false;
-            }
-        }
         
-        
-        // ... (GetCardFromBoard and GetUndealtCount remain the same) ...
+        // Gets a specific card from the board by its index.
         public Card? GetCardFromBoard(int index)
         {
             var cards = board.GetCards();
@@ -86,12 +88,34 @@ namespace Elevens
             {
                 return cards[index];
             }
-            return null;
+            return null; // Return null if the index is out of bounds
         }
 
+        // Gets the number of cards remaining in the deck.
         public int GetUndealtCount()
         {
             return deck.Count;
+        }
+
+        // --- Private Methods ---
+
+        // Checks if the game has been won or lost and updates the game state.
+        private void CheckForWin()
+        {
+            // Win condition: The board and deck are both empty.
+            if (board.Count == 0 && deck.Empty)
+            {
+                gameOver = true;
+                playerWon = true;
+            }
+            // Loss condition: There are no possible moves left on the board.
+            // This is the fix: We don't need to check if the deck is empty.
+            // If the board is stuck, the game is over.
+            else if (!moveValidator.HasAnyValidMove(board.GetCards()))
+            {
+                gameOver = true;
+                playerWon = false;
+            }
         }
     }
 }

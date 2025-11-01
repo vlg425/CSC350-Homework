@@ -2,9 +2,10 @@ using System.Text;
 
 namespace Elevens
 {
+    // Handles all logic for drawing the game state to the console.
     public class ConsoleDisplay
     {
-        // The main method to draw the entire board with corrected alignment
+        // Draws the entire board of cards as ASCII art.
         public void DrawBoard(Board board)
         {
             var cards = board.GetCards();
@@ -15,34 +16,36 @@ namespace Elevens
             }
 
             // Use StringBuilder for efficient string building
-            var top = new StringBuilder();    // For the top border line: " ┌─────┐"
-            var middle = new StringBuilder(); // For the rank/suit line:  " │ A ♥ │"
-            var bottom = new StringBuilder(); // For the bottom border:   " └─────┘"
-            var indices = new StringBuilder();// For the index display:   "   [0]  "
+            // This is much faster than adding strings together in a loop
+            var top = new StringBuilder();    // For the top border line: " ┌───┐"
+            var middle = new StringBuilder(); // For the rank/suit line:  " │A ♥│"
+            var bottom = new StringBuilder(); // For the bottom border:   " └───┘"
+            var indices = new StringBuilder();// For the index display:   "  [0] "
 
+            // Loop through each card on the board
             for (int i = 0; i < cards.Count; i++)
             {
                 Card card = cards[i];
                 string rank = GetRankSymbol(card.Rank);
                 string suit = GetSuitSymbol(card.Suit);
 
-                // Append the pieces for each card to their respective lines
+                // Append the pieces for this card to their respective lines
                 top.Append(" ┌───┐");
 
-                // Conditional padding to align all cards perfectly
+                // Handle the "10" rank, which is two characters
                 if (rank == "10")
                 {
-                    // No extra padding needed for the two-character "10"
+                    // No extra padding needed
                     middle.Append($" │{rank}{suit}│");
                 }
                 else
                 {
-                    // Add extra space for single-character ranks to maintain width
+                    // Add extra space for single-character ranks (A, 2-9, J, Q, K)
                     middle.Append($" │{rank} {suit}│");
                 }
                 
                 bottom.Append(" └───┘");
-                indices.Append($"  [{i}] ");
+                indices.Append($"  [{i}] "); // Display the card's index
             }
 
             // Print each fully assembled line to the console
@@ -52,7 +55,7 @@ namespace Elevens
             Console.WriteLine(indices.ToString());
         }
 
-        // Helper method to get the character for a suit
+        // Helper method to get the Unicode symbol for a suit.
         private string GetSuitSymbol(Suit suit)
         {
             switch (suit)
@@ -65,7 +68,7 @@ namespace Elevens
             }
         }
 
-        // Helper method to get the string for a rank
+        // Helper method to get the string representation for a rank.
         private string GetRankSymbol(Rank rank)
         {
             switch (rank)
@@ -75,7 +78,7 @@ namespace Elevens
                 case Rank.Queen: return "Q";
                 case Rank.Jack:  return "J";
                 case Rank.Ten:   return "10";
-                default:         return ((int)rank).ToString();
+                default:         return ((int)rank).ToString(); // For 2-9
             }
         }
     }
