@@ -10,12 +10,11 @@
             var display = new ConsoleDisplay();
             game.StartNewGame();
 
-            Console.WriteLine("--- Welcome to Elevens! ---");
-            Console.WriteLine("Select pairs of cards that sum to 11, or a set of Jack, Queen, King.");
-
             // Main game loop: continues as long as the game is not over
             while (!game.gameOver)
             {
+                Console.Clear(); // Clear the screen at the start of each turn
+
                 // --- Display Game State ---
                 Console.WriteLine("\n---------------------------------");
                 Console.WriteLine($"Cards left in deck: {game.GetUndealtCount()}");
@@ -23,20 +22,26 @@
                 display.DrawBoard(game.board);
 
                 // --- Get Player Input ---
+                Console.ForegroundColor = ConsoleColor.Cyan; // Make the prompt color stand out
                 Console.WriteLine("\nSelect cards to play by typing their numbers, separated by spaces (e.g., '0 4'):");
-                var selectedCardsForMove = new List<Card>(); // To hold the cards the user picks
-                string? input = Console.ReadLine(); // Read the text the user types
+                Console.ResetColor(); // Reset color for user input
+
+                var selectedCardsForMove = new List<Card>();
+                string? input = Console.ReadLine();
 
                 // Check for empty input
                 if (string.IsNullOrWhiteSpace(input))
                 {
-                    Console.WriteLine("Invalid input. Please enter numbers.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Invalid input. Please enter numbers. Press Enter to try again.");
+                    Console.ResetColor();
+                    Console.ReadLine(); // <-- FIX 1: Pause for user to read
                     continue; // Skip the rest of the loop and ask again
                 }
 
                 // --- Parse and Validate Input ---
-                string[] parts = input.Trim().Split(' '); // Split input by spaces, e.g., "0 4" -> ["0", "4"]
-                bool validInput = true; // Flag to track if the input is good
+                string[] parts = input.Trim().Split(' ');
+                bool validInput = true; 
 
                 foreach (var part in parts)
                 {
@@ -53,17 +58,23 @@
                         else
                         {
                             // The index was a number, but not a valid spot on the board
-                            Console.WriteLine($"Error: Index '{index}' is not valid. Please try again.");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"Error: Index '{index}' is not valid. Press Enter to try again.");
+                            Console.ResetColor();
+                            Console.ReadLine(); // <-- FIX 1: Pause for user to read
                             validInput = false;
-                            break; // Stop parsing this input
+                            break; 
                         }
                     }
                     else
                     {
-                        // The input wasn't even a number (e.g., "a" or "hello")
-                        Console.WriteLine($"Error: '{part}' is not a valid number. Please try again.");
+                        // The input wasn't even a number
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Error: '{part}' is not a valid number. Press Enter to try again.");
+                        Console.ResetColor();
+                        Console.ReadLine(); // <-- FIX 1: Pause for user to read
                         validInput = false;
-                        break; // Stop parsing this input
+                        break; 
                     }
                 }
 
@@ -74,26 +85,41 @@
                 }
 
                 // --- Attempt the Move ---
-                // Try to play the selected cards
                 bool moveWasMade = game.TryPlaySelected(selectedCardsForMove);
                 
                 // If the move was not legal, inform the user
                 if (!moveWasMade)
                 {
-                    Console.WriteLine("That is not a valid move. Remember: pairs must sum to 11, or you need a Jack, Queen, and King.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("That is not a valid move. Remember: pairs must sum to 11, or you need a J, Q, and K.");
+                    Console.WriteLine("Press Enter to try again.");
+                    Console.ResetColor();
+                    Console.ReadLine(); // <-- FIX 1: Pause for user to read
                 }
             }
 
             // --- Game Over ---
             // This code runs only after the 'while' loop finishes (when game.gameOver is true)
+            
+            Console.Clear(); // Clear the final board one last time
+            Console.WriteLine("---------------------------------");
+            Console.WriteLine($"Cards left in deck: {game.GetUndealtCount()}");
+            Console.WriteLine("Final Board:");
+            
+            display.DrawBoard(game.board); // <-- FIX 2: Draw the final board state
+            
             Console.WriteLine("\n--- Game Over ---");
             if (game.playerWon)
             {
+                Console.ForegroundColor = ConsoleColor.Green; // Green for win
                 Console.WriteLine("Congratulations! You won! 🎉");
+                Console.ResetColor();
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Yellow; // Yellow for loss
                 Console.WriteLine("No more moves are possible. Better luck next time!");
+                Console.ResetColor();
             }
         }
     }

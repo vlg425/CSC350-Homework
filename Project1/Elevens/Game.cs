@@ -47,8 +47,26 @@ namespace Elevens
             gameOver = false;
             playerWon = false;
             
-            // Check the board immediately in case there are no moves on the first deal.
-            CheckForWin();
+            // Keep reshuffling the whole deck until we get a playable hand.
+            while (!moveValidator.HasAnyValidMove(board.GetCards()))
+            {
+                // This check is a safety net, but should be almost impossible
+                // to hit with a full 52-card deck.
+                if (deck.Empty) {
+                    gameOver = true;
+                    playerWon = false;
+                    return; // Exit if we somehow have no cards and no moves
+                }
+
+                Console.WriteLine("Initial hand is unplayable. Reshuffling and dealing a new hand...");
+                
+                // Re-gather all 52 cards, shuffle, and deal again.
+                deck = new Deck(); // Get a fresh 52-card deck
+                deck.Shuffle();
+                board.ClearBoard();
+                board.DealInitial(deck); // Deal 9 new cards
+            }
+            // The loop will only finish when the board has at least one valid move.
         }
 
         // Attempts to play the cards selected by the user.
