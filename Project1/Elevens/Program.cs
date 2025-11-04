@@ -1,126 +1,108 @@
-﻿namespace Elevens
+﻿//********************************************************************************
+// Victor Garcia
+// CSC350H
+// Project 1: Elevens
+//
+//********************************************************************************
+
+using System.Text;
+
+namespace Elevens
 {
-    // This class holds the Main method, which is the entry point for the program.
     class Program
     {
         static void Main(string[] args)
         {
-            // Initialize the game engine and the console display helper
-            var game = new Game();
-            var display = new ConsoleDisplay();
-            game.StartNewGame();
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.CursorVisible = false;
+            Console.Clear();
 
-            // Main game loop: continues as long as the game is not over
-            while (!game.gameOver)
+            ConsoleDisplay display = new ConsoleDisplay();
+            StatusManager status = new StatusManager();
+
+            int wins = 0;
+            int totalGames = 0;
+
+            // --- Outer "Play Again" Loop ---
+            while (true)
             {
-                Console.Clear(); // Clear the screen at the start of each turn
+                totalGames++;
+                Game game = new Game();
+                bool[] selected = new bool[9];
+                string statusMessage = status.GetStatus(StatusText.Welcome,game.CurrentState);
 
-                // --- Display Game State ---
-                Console.WriteLine("\n---------------------------------");
-                Console.WriteLine($"Cards left in deck: {game.GetUndealtCount()}");
-                Console.WriteLine("Current Board:");
-                display.DrawBoard(game.board);
+                // --- Initial Full-Screen Draw ---
+                display.DrawHeader(game.deck.Count, wins, totalGames);
+                display.DrawBoard(game.Board, selected);
+                display.DrawFooter(game.CurrentState, statusMessage);
 
-                // --- Get Player Input ---
-                Console.ForegroundColor = ConsoleColor.Cyan; // Make the prompt color stand out
-                Console.WriteLine("\nSelect cards to play by typing their numbers, separated by spaces (e.g., '0 4'):");
-                Console.ResetColor(); // Reset color for user input
-
-                var selectedCardsForMove = new List<Card>();
-                string? input = Console.ReadLine();
-
-                // Check for empty input
-                if (string.IsNullOrWhiteSpace(input))
+                // --- Inner "UI" Loop ---
+                while (game.CurrentState == GameState.PlayerTurn)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid input. Please enter numbers. Press Enter to try again.");
-                    Console.ResetColor();
-                    Console.ReadLine(); // <-- FIX 1: Pause for user to read
-                    continue; // Skip the rest of the loop and ask again
-                }
+                    // --- Handle Input ---
+                    ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
-                // --- Parse and Validate Input ---
-                string[] parts = input.Trim().Split(' ');
-                bool validInput = true; 
-
-                foreach (var part in parts)
-                {
-                    // Try to convert the text part to a number (index)
-                    if (int.TryParse(part, out int index))
+                    if (keyInfo.Key == ConsoleKey.Enter)
                     {
-                        // If it's a number, get the card from the board at that index
-                        Card? card = game.GetCardFromBoard(index);
-                        if (card != null)
+                        List<Card> cardsToPlay = new List<Card>();
+                        var boardCards = game.Board.GetCards();
+                        for (int i = 0; i < boardCards.Count; i++)
                         {
-                            // Add the valid card to the list for this move
-                            selectedCardsForMove.Add(card);
+                            if (selected[i])
+                            {
+                                cardsToPlay.Add(boardCards[i]);
+                            }
                         }
-                        else
+
+                        StatusText moveResult = game.PlayTurn(cardsToPlay);
+                        statusMessage = status.GetStatus(moveResult, game.CurrentState, cardsToPlay);
+                        
+                        Array.Clear(selected, 0, selected.Length);
+
+                        display.DrawHeader(game.deck.Count, wins, totalGames);
+                        display.DrawBoard(game.Board, selected);
+                        display.DrawFooter(game.CurrentState, statusMessage);
+                    }
+                    else if (keyInfo.Key == ConsoleKey.Q)
+                    {
+                        display.DrawGoodbyeScreen(wins, totalGames);
+                        return; // Exit application
+                    }
+                    else if (keyInfo.Key >= ConsoleKey.D1 && keyInfo.Key <= ConsoleKey.D9)
+                    {
+                        int index = keyInfo.Key - ConsoleKey.D1;
+                        var boardCards = game.Board.GetCards();
+                        if (index < boardCards.Count)
                         {
-                            // The index was a number, but not a valid spot on the board
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine($"Error: Index '{index}' is not valid. Press Enter to try again.");
-                            Console.ResetColor();
-                            Console.ReadLine(); // <-- FIX 1: Pause for user to read
-                            validInput = false;
-                            break; 
+                            selected[index] = !selected[index];
+
+                            // Redraw just the board to show the selection
+                            display.DrawBoard(game.Board, selected);
                         }
                     }
-                    else
-                    {
-                        // The input wasn't even a number
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Error: '{part}' is not a valid number. Press Enter to try again.");
-                        Console.ResetColor();
-                        Console.ReadLine(); // <-- FIX 1: Pause for user to read
-                        validInput = false;
-                        break; 
-                    }
                 }
+                // --- End of Inner "UI" Loop ---
 
-                // If any part of the input was bad, restart the loop
-                if (!validInput)
+                if (game.CurrentState == GameState.Win)
                 {
-                    continue;
+                    wins++;
+                    display.DrawHeader(game.deck.Count, wins, totalGames);
                 }
 
-                // --- Attempt the Move ---
-                bool moveWasMade = game.TryPlaySelected(selectedCardsForMove);
-                
-                // If the move was not legal, inform the user
-                if (!moveWasMade)
+                ConsoleKeyInfo playAgainKey;
+                do
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("That is not a valid move. Remember: pairs must sum to 11, or you need a J, Q, and K.");
-                    Console.WriteLine("Press Enter to try again.");
-                    Console.ResetColor();
-                    Console.ReadLine(); // <-- FIX 1: Pause for user to read
+                    playAgainKey = Console.ReadKey(true);
+                } while (playAgainKey.Key != ConsoleKey.Y && playAgainKey.Key != ConsoleKey.N);
+
+                if (playAgainKey.Key == ConsoleKey.N)
+                {
+                    break; 
                 }
             }
-
-            // --- Game Over ---
-            // This code runs only after the 'while' loop finishes (when game.gameOver is true)
             
-            Console.Clear(); // Clear the final board one last time
-            Console.WriteLine("---------------------------------");
-            Console.WriteLine($"Cards left in deck: {game.GetUndealtCount()}");
-            Console.WriteLine("Final Board:");
-            
-            display.DrawBoard(game.board); // <-- FIX 2: Draw the final board state
-            
-            Console.WriteLine("\n--- Game Over ---");
-            if (game.playerWon)
-            {
-                Console.ForegroundColor = ConsoleColor.Green; // Green for win
-                Console.WriteLine("Congratulations! You won! 🎉");
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow; // Yellow for loss
-                Console.WriteLine("No more moves are possible. Better luck next time!");
-                Console.ResetColor();
-            }
+            display.DrawGoodbyeScreen(wins, totalGames);
         }
     }
 }
+

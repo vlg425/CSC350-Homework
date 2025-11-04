@@ -1,8 +1,14 @@
-// Defines the four possible suits for a card.
-public enum Suit
+//********************************************************************************
+// Victor Garcia
+// CSC350H
+// Project 1: Elevens
+//
+//********************************************************************************
+
+namespace Elevens
 {
-    Clubs,
-    Diamonds,
-    Hearts,
-    Spades
+    public enum Suit
+    {
+        Clubs, Diamonds, Hearts, Spades
+    }
 }

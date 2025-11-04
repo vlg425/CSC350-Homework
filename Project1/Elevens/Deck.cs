@@ -1,63 +1,46 @@
-// Represents a standard 52-card deck.
-public class Deck
+//********************************************************************************
+// Victor Garcia
+// CSC350H
+// Project 1: Elevens
+//
+//********************************************************************************
+
+namespace Elevens
 {
-    // The list of cards currently in the deck
-    private List<Card> cards;
-
-    // --- Properties ---
-
-    // Gets a copy of the cards currently in the deck.
-    public List<Card> Cards { get { return new List<Card>(cards); } }
-
-    // The number of cards remaining in the deck.
-    public int Count { get { return cards.Count; } }
-
-    // Returns true if the deck has no cards left.
-    public bool Empty { get { return cards.Count == 0; } }
-
-    // --- Constructor ---
-
-    // Creates a new, unshuffled 52-card deck.
-    public Deck()
+    public class Deck
     {
-        cards = new List<Card>();
-        // Loop through all suits (Clubs, Diamonds, Hearts, Spades)
-        foreach (Suit suit in Enum.GetValues(typeof(Suit)))
+        private List<Card> cards;
+        public int Count => cards.Count;
+        public bool Empty => cards.Count == 0;
+
+        public Deck()
         {
-            // Loop through all ranks (Ace to King)
-            foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+            cards = new List<Card>();
+            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             {
-                // Add a new card of this suit and rank
-                cards.Add(new Card(rank, suit));
+                foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+                {
+                    cards.Add(new Card(suit, rank));
+                }
             }
         }
-    }
 
-    // --- Public Methods ---
-
-    // Removes and returns the top card from the deck.
-    public Card? TakeTopCard()
-    {
-        if (Empty) return null; // Return null if the deck is empty
-        
-        Card topCard = cards[0];   // Get the card at the top (index 0)
-        cards.RemoveAt(0);         // Remove it from the list
-        return topCard;            // Return the card
-    }
-    
-    // Shuffles the deck using the Fisher-Yates algorithm.
-    public void Shuffle()
-    {
-        Random random = new Random();
-        int n = cards.Count;
-        while (n > 1)
+        public void Shuffle()
         {
-            n--;
-            int k = random.Next(n + 1);
-            // Swap the cards at index k and n
-            Card temp = cards[k];
-            cards[k] = cards[n];
-            cards[n] = temp;
+            Random random = new Random();
+            for (int i = cards.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (cards[i], cards[j]) = (cards[j], cards[i]);
+            }
+        }
+
+        public Card? TakeTopCard()
+        {
+            if (Empty) return null;
+            Card topCard = cards[0];
+            cards.RemoveAt(0);
+            return topCard;
         }
     }
 }

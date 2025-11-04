@@ -1,29 +1,61 @@
-// Represents a single playing card with a Rank and a Suit.
-public class Card
+//********************************************************************************
+// Victor Garcia
+// CSC350H
+// Project 1: Elevens
+//
+//********************************************************************************
+
+namespace Elevens
 {
-    // --- Properties ---
-
-    // The rank (value) of the card, e.g., Ace, Two, King.
-    public Rank Rank { get; }
-
-    // The suit of the card, e.g., Hearts, Spades.
-    public Suit Suit { get; }
-
-    // --- Constructor ---
-
-    // Creates a new card with a specific rank and suit.
-    public Card(Rank rank, Suit suit)
+    public class Card
     {
-        this.Rank = rank;
-        this.Suit = suit;
-    }
-    
-    // --- Methods ---
+        public Suit Suit { get; }
+        public Rank Rank { get; }
 
-    // Returns a human-readable string for the card.
-    // Example: "Ace of Spades"
-    public override string ToString()
-    {
-        return $"{Rank} of {Suit}";
+        public string RankSymbol { get; }
+        public string SuitSymbol { get; }
+        public string Symbol { get; }
+        // ---Consstructor---
+        public Card(Suit suit, Rank rank)
+        {
+            Suit = suit;
+            Rank = rank;
+
+            RankSymbol = GetRankSymbol(rank);
+            SuitSymbol = GetSuitSymbol(suit);
+            Symbol = $"{RankSymbol}{SuitSymbol}";
+        }
+
+        public override string ToString()
+        {
+            return $"{Rank} of {Suit}";
+        }
+
+        private static string GetSuitSymbol(Suit suit)
+        {
+            switch (suit)
+            {
+                case Suit.Hearts: return "♥";
+                case Suit.Diamonds: return "♦";
+                case Suit.Clubs: return "♣";
+                case Suit.Spades: return "♠";
+                default: return "?";
+            }
+        }
+
+        private static string GetRankSymbol(Rank rank)
+        {
+            switch (rank)
+            {
+                case Rank.Ace: return "A";
+                case Rank.King: return "K";
+                case Rank.Queen: return "Q";
+                case Rank.Jack: return "J";
+                case Rank.Ten: return "10";
+                default: return ((int)rank).ToString();
+            }
+        }
+
+
     }
 }
