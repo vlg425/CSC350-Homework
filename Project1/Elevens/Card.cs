@@ -15,6 +15,7 @@ namespace Elevens
         public string RankSymbol { get; }
         public string SuitSymbol { get; }
         public string Symbol { get; }
+        
         // ---Consstructor---
         public Card(Suit suit, Rank rank)
         {

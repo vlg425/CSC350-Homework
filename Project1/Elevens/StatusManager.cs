@@ -1,5 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
+//********************************************************************************
+// Victor Garcia
+// CSC350H
+// Project 1: Elevens
+//
+//********************************************************************************
 
 namespace Elevens
 {
@@ -22,7 +26,7 @@ namespace Elevens
             // --- If not game over, check the move result ---
             switch (status)
             {
-                 case StatusText.Welcome:
+                case StatusText.Welcome:
                     return "Rules: Valid Pair = 11, Valid Trio = J, Q, K.";
 
                 case StatusText.ValidPair:
@@ -41,12 +45,12 @@ namespace Elevens
                     var k = cards.First(c => c.Rank == Rank.King);
                     return $"Valid Trio! {j.Symbol}, {q.Symbol}, {k.Symbol}.";
 
-                case StatusText.InvalidTrioMove: 
+                case StatusText.InvalidTrioMove:
                     return "Invalid Trio! A J, Q, and K must be selected.";
 
                 case StatusText.InvalidSelection:
                     return "Invalid Move! Pair must = 11, Trio must = J, Q, K.";
-                
+
                 case StatusText.NoCardSelected:
                     return "You must select cards to play.";
 

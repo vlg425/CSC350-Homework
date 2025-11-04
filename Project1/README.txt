@@ -1,50 +1,64 @@
-=======================
-CSC350 Project 1: Elevens Card Game
-=======================
 
-A console-based implementation of the "Elevens" card game, written in C# for .NET. The objective is to clear the entire 52-card deck by making valid plays on a 9-card board.
+Project 1: Elevens
+Author: Victor Garcia (CSC350H)
+
+======================================================================
+
+== Description ==
+
+"Elevens" is a simple, text-based console card game implemented in C# and .NET 9. The objective is to clear the entire 52-card deck by strategically removing cards from a 9-card board.
+
+The game is built with a focus on separating concerns, with different classes managing the game logic (Game.cs), the console display (ConsoleDisplay.cs), and the game state messages (StatusManager.cs).
 
 
--------------------
-How to Build and Run
--------------------
+== How to Play ==
 
-This project is built with .NET. You can run it from the command line or directly from an IDE like Visual Studio Code.
+The goal is to remove all cards from the deck and the board.
 
-1.  Prerequisites: Make sure you have the .NET SDK installed on your system.
-2.  Open Terminal: Open a terminal or command prompt in the root directory of the project (the folder containing `Elevens.csproj` [cite: 1]).
-3.  Build the Project Run the following command to compile the application:
-    dotnet build
-4.  Run the Game: After the build is successful, run this command to start the game:
+1.  A 9-card board is dealt from a 52-card deck.
+2.  You can remove cards from the board in two ways:
+    * **Valid Pair:** Select two cards that add up to 11 (e.g., 8 + 3, 7 + 4, 10 + Ace).
+    * **Valid Trio:** Select a Jack, a Queen, and a King.
+3.  After you make a valid move, the selected cards are removed from the board and replaced with new cards from the deck.
+4.  The game ends when:
+    * **You WIN:** The deck is empty and the board is cleared.
+    * **You LOSE:** No more valid moves (Pairs or Trios) are possible on the board.
+
+== Controls ==
+
+* [1] - [9]: Toggle the selection for the card in that position.
+* [Enter]:   Submit your selected cards to make a play.
+* [Q]:       Quit the game at any time.
+* [Y] / [N]: Choose to play a new game after a win or loss.
+
+
+== How to Build and Run ==
+
+[cite_start]This project is a .NET 9.0 console application[cite: 1].
+
+1.  Ensure you have the .NET 9.0 SDK (or newer) installed on your machine.
+2.  Open a terminal or command prompt.
+3.  Navigate to the project folder (e.g., ".../project 1/elevens").
+4.  Run the following command:
+
     dotnet run
 
-
--------------------
-How to Play
--------------------
-
-The goal of Elevens is to remove all cards from the deck and the board.
-
-1.  The Board The game starts with 9 cards dealt from a shuffled 52-card deck. Each card on the board is assigned an index number from 0 to 8.
-2.  Making a Move: To make a move, type the index numbers of the cards you wish to play, separated by spaces, and press Enter. For example: `0 4`
-3.  Valid Moves: There are two types of valid moves:
-    - Pair Sum 11: Select two cards whose ranks add up to 11 (e.g., a 3 and an 8). Aces count as 1. Face cards (Jack, Queen, King) cannot be used in these pairs.
-    - J-Q-K Set: Select a set of three cards consisting of one Jack, one Queen, and one King.
-4.  Gameplay Loop: After you make a valid move, the selected cards are removed from the board, and the empty spots are automatically refilled with new cards from the deck.
-5.  Winning: You win the game if you successfully clear the entire board and the deck runs out of cards.
-6.  Losing: The game is over if the deck is empty and there are no more possible valid moves on the board.
+This command will automatically build and launch the game in your console.
 
 
--------------------
-Project File Structure
--------------------
+== Project Structure ==
 
-* `Program.cs`: The main entry point for the application. It contains the primary game loop and handles all user input from the console.
-* `Game.cs`: The core game engine. It manages the game state, including the deck, the board, and win/loss conditions.
-* `Board.cs`: Represents the 9 cards on the game board. Manages dealing, refilling, and discarding cards.
-* `Deck.cs`: Represents a standard 52-card deck. It is responsible for creation, shuffling, and dealing the top card.
-* `Card.cs`: Defines a single playing card with a `Rank` and a `Suit`.
-* `MoveValidator.cs`: Contains the logic to verify if a player's selected cards constitute a valid move (either a sum-to-11 pair or a J-Q-K set).
-* `ConsoleDisplay.cs`: Responsible for rendering the ASCII art representation of the cards and the board in the console.
-* `Rank.cs` / `Suit.cs`: Enum files that define the possible ranks (Ace through King) and suits (Hearts, Diamonds, etc.) for the cards.
-* `Elevens.csproj`: The .NET project file that defines project settings and dependencies.
+The project logic is separated into the following key classes:
+
+* Program.cs:           The main entry point. Handles the primary game loop and user input (key presses).
+* Game.cs:              The core game logic engine. Manages the game state (Win/Loss/Turn), validates moves, and coordinates the board and deck.
+* Board.cs:             Manages the 9 cards currently in play on the board. Handles card replacement logic.
+* Deck.cs:              Represents the 52-card deck, with methods for shuffling and drawing cards.
+* Card.cs / Rank.cs:    Defines the Card object, its Rank, and its Suit. (Note: This project also requires a `Suit.cs` enum file defining Hearts, Diamonds, Clubs, Spades).
+
+* ConsoleDisplay.cs:    A dedicated class for rendering all UI components to the console (header, board, card art, and footer).
+* StatusManager.cs:     A helper class that translates game logic enums (like `StatusText.ValidPair`) into user-friendly notification strings.
+* StatusText.cs:        An enum listing all possible game move results and states (e.g., `ValidPair`, `InvalidTrioMove`, `Welcome`).
+* Elevens.csproj:       The C# project file, which specifies the project target (net9.0)[cite: 1].
+
+
