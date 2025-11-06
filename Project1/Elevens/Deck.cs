@@ -1,46 +1,91 @@
-//********************************************************************************
-// Victor Garcia
-// CSC350H
-// Project 1: Elevens
-//
-//********************************************************************************
+using System;
+using System.Collections.Generic;
 
 namespace Elevens
 {
+    //================================================================================
+    // **Deck**
+    //
+    // Manages the 52-card deck. Handles shuffling and dealing.
+    //================================================================================
     public class Deck
     {
-        private List<Card> cards;
-        public int Count => cards.Count;
-        public bool Empty => cards.Count == 0;
+        // --- Fields ---
+        // A "master" list of 52 cards, used to reset the deck
+        private readonly List<Card> _masterCardList;
+        // The "active" draw pile we deal from
+        private readonly List<Card> _drawPile;
+        // A single, shared Random object for shuffling
+        private static Random _random = new Random();
 
+        // --- Properties ---
+        
+        // How many cards are left in the draw pile
+        public int Count
+        {
+            get { return _drawPile.Count; }
+        }
+
+        // --- Constructor ---
+        // Creates a new deck, builds the 52-card master list,
+        // and copies it to the active draw pile.
         public Deck()
         {
-            cards = new List<Card>();
+            _masterCardList = new List<Card>();
+
+            // Loop through all suits and ranks to build 52 cards
             foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             {
                 foreach (Rank rank in Enum.GetValues(typeof(Rank)))
                 {
-                    cards.Add(new Card(suit, rank));
+                    _masterCardList.Add(new Card(suit, rank));
                 }
             }
+            
+            // The draw pile starts as a copy of the master list
+            _drawPile = new List<Card>(_masterCardList);
         }
 
+        // --- Public Methods ---
+
+        // Resets the draw pile to a full 52 cards.
+        public void Reset()
+        {
+            _drawPile.Clear();
+            _drawPile.AddRange(_masterCardList);
+        }
+
+        // Shuffles the draw pile using the Fisher-Yates algorithm.
         public void Shuffle()
         {
-            Random random = new Random();
-            for (int i = cards.Count - 1; i > 0; i--)
+            int n = _drawPile.Count;
+            while (n > 1)
             {
-                int j = random.Next(i + 1);
-                (cards[i], cards[j]) = (cards[j], cards[i]);
+                n--;
+                int k = _random.Next(n + 1);
+                
+                // Swap card [k] with card [n]
+                Card tempCard = _drawPile[k];
+                _drawPile[k] = _drawPile[n];
+                _drawPile[n] = tempCard;
             }
         }
 
-        public Card? TakeTopCard()
+        // Deals one card from the top of the deck.
+        // returns: A Card, or null if the deck is empty.
+        public Card? Deal()
         {
-            if (Empty) return null;
-            Card topCard = cards[0];
-            cards.RemoveAt(0);
-            return topCard;
+            if (_drawPile.Count == 0)
+            {
+                return null; // Deck is empty
+            }
+            
+            // Get the top card
+            Card cardToDeal = _drawPile[0];
+            // Remove it from the draw pile
+            _drawPile.RemoveAt(0);
+            
+            return cardToDeal;
         }
     }
 }

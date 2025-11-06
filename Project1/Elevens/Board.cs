@@ -1,60 +1,75 @@
-//********************************************************************************
-// Victor Garcia
-// CSC350H
-// Project 1: Elevens
-//
-//********************************************************************************
+using System;
+using System.Collections.Generic;
 
 namespace Elevens
 {
+    //================================================================================
+    // **Board**
+    //
+    // It holds the 9 card slots.
+    // It does not contain any game logic, it just holds data for
+    // the ElevensGame class to manage.
+    //================================================================================
     public class Board
     {
-        private List<Card> cardsOnBoard;
-        private const int BOARD_SIZE = 9;
+        // --- Fields ---
+        private readonly Card?[] _cardSlots; // An array of 9 nullable Cards
 
-        public int Count => cardsOnBoard.Count;
-        public List<Card> GetCards() => new List<Card>(cardsOnBoard);
+        // --- Properties ---
 
-        public Board()
+        // How many slots are on this board (e.g., 9)
+        public int BoardSize
         {
-            cardsOnBoard = new List<Card>();
+            get { return _cardSlots.Length; }
         }
 
-        public void DealInitial(Deck deck)
+        // How many slots currently have a card in them
+        public int ActiveCardCount
         {
-            Refill(deck);
-        }
-
-        public void ReplaceAndRefill(List<Card> selected, Deck deck)
-        {
-            var indices = selected.Select(card => cardsOnBoard.IndexOf(card))
-                                  .Where(index => index != -1)
-                                  .OrderByDescending(index => index)
-                                  .ToList();
-
-            foreach (int index in indices)
+            get
             {
-                Card? newCard = deck.TakeTopCard();
-                if (newCard != null)
+                int count = 0;
+                foreach (Card? card in _cardSlots)
                 {
-                    cardsOnBoard[index] = newCard;
+                    if (card != null)
+                    {
+                        count++;
+                    }
                 }
-                else
-                {
-                    cardsOnBoard.RemoveAt(index);
-                }
+                return count;
             }
         }
 
-        public void Refill(Deck deck)
+        // A read-only list of the cards, for the View to draw
+        public IReadOnlyList<Card?> CardsOnBoard
         {
-            while (cardsOnBoard.Count < BOARD_SIZE && !deck.Empty)
+            get { return Array.AsReadOnly(_cardSlots); }
+        }
+
+        // --- Constructor ---
+        public Board(int size)
+        {
+            _cardSlots = new Card?[size];
+        }
+        
+        // --- Public Methods ---
+        
+        // Reads the card at a specific index (0-8)
+        public Card? ReadCardAt(int index)
+        {
+            if (index < 0 || index >= _cardSlots.Length)
             {
-                Card? newCard = deck.TakeTopCard();
-                if (newCard != null)
-                {
-                    cardsOnBoard.Add(newCard);
-                }
+                return null;
+            }
+            return _cardSlots[index];
+        }
+
+        // Places a card (or null) at a specific index (0-8)
+        public void PlaceCardAt(int index, Card? card)
+        {
+            if (index >= 0 && index < _cardSlots.Length)
+            {
+                _cardSlots[index] = card;
             }
         }
     }
