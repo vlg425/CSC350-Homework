@@ -5,172 +5,270 @@ using System.Collections.Generic;
 namespace Elevens
 {
     //================================================================================
-    // **ElevensDisplay**
-    //
-    // This class is responsible for ALL drawing to the console.
-    // reads data from the Model but cannot change it.
-    // It also translates game enums into displayable strings.
+    // **ElevensDisplay (The "View")**
     //================================================================================
     public class ElevensDisplay
     {
-        // --- Constants ---
-        private const int _columnWidth = 6;
-        private const string _separator =    "=====================================================";
-        private const string _blankLine =    "                                                     ";
-        private const string _instructions = "[1]-[9] to toggle. [ENTER] to play. [Q] to quit.";
-
         // --- Private Helpers ---
-
-        // Clears a specific rectangular region of the console.
-        // Used to prevent flickering by only redrawing what's needed.
-        private void ClearRegion(int top, int height)
+        private void SetPos(int x, int y)
         {
-            Console.SetCursorPosition(0, top);
-            for (int i = 0; i < height; i++)
-            {
-                Console.WriteLine(_blankLine);
-            }
+            try { Console.SetCursorPosition(x, y); }
+            catch (ArgumentOutOfRangeException) { /* Console too small */ }
         }
-        
-        // Translates the game state and turn result into a
-        // human-readable message for the footer.
-        // - state: The current GameState.
-        // - turnResult: The result of the last turn.
-        // - cards: The cards involved in the last turn.
-        // returns A string message for the player.
+
+        // Centers text within a given width
+        private string CenterText(string text, int width)
+        {
+            if (text.Length >= width) return text.Substring(0, width);
+            int padding = (width - text.Length) / 2;
+            return text.PadLeft(padding + text.Length).PadRight(width);
+        }
+
+        // Translates game state into a human-readable notification
         private string GenerateNotification(GameState state, TurnResult turnResult, IReadOnlyList<Card> cards)
         {
-            // GameState messages (Win/Loss) have top priority
+            if (state == GameState.ConfirmQuit)
+            {
+                return "Are you sure you want to quit? [Y]/[N]";
+            }
             if (state == GameState.Win)
             {
-                return "CONGRATULATIONS! YOU WIN! Play again? (Y/N)";
+                return "CONGRATULATIONS! YOU WIN! Play again? [Y]/[N]";
             }
             if (state == GameState.Loss)
             {
-                return "No more moves! GAME OVER! Play again? (Y/N)";
+                return "No more moves! You Lose! Play again? [Y]/[N]";
+            }
+            if (state == GameState.ViewingRules)
+            {
+                return "Use [←] and [→] to view rules. [R] to return.";
             }
 
-            // If not game over, show the turn result
             switch (turnResult)
             {
-                case TurnResult.Welcome:
-                    return "Rules: Valid Pair = 11, Valid Trio = J, Q, K.";
-                case TurnResult.ValidPair:
-                    return $"Valid Pair! {cards[0].Symbols} + {cards[1].Symbols} = 11.";
+                case TurnResult.Welcome: return "[Numkeys]Select [Enter]Confirm [R]Rules [Q]Quit";
+                case TurnResult.ValidPair: return $"Valid Pair! {cards[0].Symbols} + {cards[1].Symbols} = 11.";
                 case TurnResult.InvalidPairSum:
                     int sum = (int)cards[0].Rank + (int)cards[1].Rank;
                     return $"Invalid Pair! {cards[0].Symbols} + {cards[1].Symbols} = {sum}.";
                 case TurnResult.ValidTrio:
-                    // Find the J, Q, K to display them in order
-                    string j = "";
-                    string q = "";
-                    string k = "";
-                    foreach (Card card in cards)
-                    {
+                    string j = ""; string q = ""; string k = "";
+                    foreach (Card card in cards) {
                         if (card.Rank == Rank.Jack) j = card.Symbols;
                         else if (card.Rank == Rank.Queen) q = card.Symbols;
                         else if (card.Rank == Rank.King) k = card.Symbols;
                     }
                     return $"Valid Trio! {j}, {q}, {k}.";
-                case TurnResult.InvalidTrioMove:
-                    return "Invalid Trio! A J, Q, and K must be selected.";
-                case TurnResult.InvalidSelection:
-                    return "Invalid Move! Pair must = 11, Trio must = J, Q, K.";
-                case TurnResult.NoCardSelected:
-                    return "You must select cards to play.";
-                case TurnResult.SlotIsEmpty:
-                    return "That slot is empty. You cannot select it.";
-                case TurnResult.None:
-                default:
-                    return ""; // Blank
+                case TurnResult.InvalidTrioMove: return "Invalid Trio! A J, Q, and K must be selected.";
+                case TurnResult.InvalidSelection: return "Invalid Move! Pair must = 11, Trio must = J, Q, K.";
+                case TurnResult.NoCardSelected: return "You must select cards to play.";
+                case TurnResult.SlotIsEmpty: return "That slot is empty. You cannot select it.";
+                case TurnResult.None: default: return "[Numkeys]Select [Enter]Confirm [R]Rules [Q]Quit";
             }
         }
 
-        // --- Public Draw Methods ---
-
-        // Draws the header (Lines 0-3)
-        public void DrawHeader(int deckCount, int wins, int totalGames)
+        // This new helper method replaces your entire if/else block
+        private void DrawDeckImage(int deckCount)
         {
-            int headerStart = 0;
-            string deckString = $"Deck: {deckCount} cards remaining";
-            string winsString = $"Wins: {wins} of {totalGames} games";
+            int stackChars = (int)Math.Ceiling((deckCount / 43.0) * 6);
+            string top, mid, bot;
 
-            Console.SetCursorPosition(0, headerStart);
-            Console.WriteLine("ELEVENS");
-            Console.WriteLine(_separator);
-            Console.WriteLine(deckString.PadRight(_separator.Length - winsString.Length) + winsString);
-            Console.WriteLine(_separator);
+            if (deckCount > 0)
+            {
+                top = "┌───┐" + "".PadRight(stackChars, '┐');
+                mid = "│░░░│" + "".PadRight(stackChars, '│');
+                bot = "└───┘" + "".PadRight(stackChars, '┘');
+            }
+            else
+            {
+                top = ""; mid = ""; bot = "";
+            }
+
+            SetPos(52, 6); Console.Write(CenterText(top, 14));
+            SetPos(52, 7); Console.Write(CenterText(mid, 14));
+            SetPos(52, 8); Console.Write(CenterText(bot, 14));
         }
 
-        // Draws the 9-slot board (Lines 4-8)
-        public void DrawBoard(IReadOnlyList<Card?> cards, IReadOnlyList<int> selectedIndices)
+        // --- Component Draw Methods ---
+
+        // 1. Draws the static header banner
+        private void DrawHeaderBanner()
         {
-            int boardStart = 4;
-            ClearRegion(boardStart, 5); // Clear the 5 lines of the board region
+            SetPos(0, 0); Console.Write("┌──────────────────░█▀▀░█░░░█▀▀░█░█░█▀▀░█▀█░█▀▀░──────────────────┐");
+            SetPos(0, 1); Console.Write("│░░░░░░░░░░░░░░░░░░░█▀▀░█░░░█▀▀░▀▄▀░█▀▀░█░█░▀▀█░░░░░░░░░░░░░░░░░░░│");
+            SetPos(0, 2); Console.Write("└──────────────────░▀▀▀░▀▀▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░──by Victor Garcia┘");
+        }
 
-            Console.SetCursorPosition(0, boardStart); 
-            Console.WriteLine(_instructions.PadRight(_separator.Length));
+        // 2. Draws the STATIC frame for the main content
+        private void DrawStaticFrame()
+        {
+            SetPos(0, 3);  Console.Write("╔═════════════════════════════════════════════════╦═══════════════╗");
+            SetPos(0, 4);  Console.Write("║                                                 ║               ║");
+            SetPos(0, 5);  Console.Write("╠═════════════════════════════════════════════════╬═══════════════╣");
+            SetPos(0, 6);  Console.Write("║                                                 ║               ║");
+            SetPos(0, 7);  Console.Write("║                                                 ║               ║");
+            SetPos(0, 8);  Console.Write("║                                                 ║               ║");
+            SetPos(0, 9);  Console.Write("║                                                 ║               ║");
+            SetPos(0, 10); Console.Write("╚═════════════════════════════════════════════════╩═══════════════╝");
+        }
+        
+        // 3. Draws the DYNAMIC content *inside* the frame
+        private void DrawDynamicContent(
+            GameState state,
+            int deckCount, 
+            int wins, 
+            int totalGames, 
+            IReadOnlyList<Card?> cards, 
+            IReadOnlyList<int> selectedIndices, 
+            TurnResult turnResult, 
+            IReadOnlyList<Card> turnCards,
+            int rulesPage
+            )
+        {
+            // --- A. Draw Left Panel (Game) ---
+            
+            // Notification 
+            string message = GenerateNotification(state, turnResult, turnCards);
+            SetPos(2, 4); Console.Write(CenterText(message, 47));
 
-            // Use StringBuilders for performance
-            var cardTopRow = new StringBuilder();
-            var cardMidRow = new StringBuilder();
-            var cardBotRow = new StringBuilder();
-            var selectdRow = new StringBuilder();
+            // Board (Cards and Selectors)
+            int startX = 2 + (47 - (9 * 5)) / 2; 
+            var selectorRow = new StringBuilder();
 
             for (int i = 0; i < 9; i++)
             {
                 Card? card = cards[i];
                 bool isSelected = selectedIndices.Contains(i);
+                int xPos = startX + (i * 5);
+                
+                if (isSelected && state != GameState.Loss)
+                {
+                    Console.BackgroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                }
 
+                string r, s;
                 if (card != null)
                 {
-                    // Slot has a card
-                    string rank = card.RankSymbol;
-                    string suit = card.SuitSymbol;
-                    string r = (rank == "10") ? $"{rank}{suit}" : $"{rank} {suit}";
-                    string s = isSelected ? "[■]" : $"[{i + 1}]"; // Show selection or number
+                    r = (card.Rank == Rank.Ten) ? $"{card.RankSymbol}{card.SuitSymbol}" : $"{card.RankSymbol} {card.SuitSymbol}";
+                    if (state == GameState.Loss)
+                    {
+                        s = "[x]";
+                    }
+                    else
+                    {
+                        s = isSelected ? "[■]" : $"[{i + 1}]";
+                    }
 
-                    cardTopRow.Append("┌───┐".PadRight(_columnWidth));                  
-                    cardMidRow.Append($"│{r}│".PadRight(_columnWidth));
-                    cardBotRow.Append("└───┘".PadRight(_columnWidth));
-                    selectdRow.Append($" {s}".PadRight(_columnWidth));
+                    SetPos(xPos, 6); Console.Write( "┌───┐");
+                    SetPos(xPos, 7); Console.Write($"│{r}│");
+                    SetPos(xPos, 8); Console.Write( "└───┘");
                 }
                 else
                 {
-                    // Slot is empty
-                    string empty = "".PadRight(_columnWidth);
-                    cardTopRow.Append(empty);
-                    cardMidRow.Append(empty);
-                    cardBotRow.Append(empty);
-                    selectdRow.Append(" [x]".PadRight(_columnWidth)); // Show 'x' for empty
+                    s = "[x]";
+                    SetPos(xPos, 6); Console.Write("┌───┐");
+                    SetPos(xPos, 7); Console.Write("│░░░│");
+                    SetPos(xPos, 8); Console.Write("└───┘");
                 }
+                
+                if (isSelected && state != GameState.Loss)
+                {
+                    Console.ResetColor();
+                }
+                
+                selectorRow.Append($" {s} ");
             }
             
-            // Draw the 4 built rows
-            Console.WriteLine(cardTopRow.ToString());
-            Console.WriteLine(cardMidRow.ToString());
-            Console.WriteLine(cardBotRow.ToString());
-            Console.WriteLine(selectdRow.ToString());
-        }
+            SetPos(2, 9); Console.Write(CenterText(selectorRow.ToString(), 47));
 
-        // Draws the footer (Lines 9-11)
-        public void DrawFooter(GameState gameState, TurnResult turnResult, IReadOnlyList<Card> turnCards)
-        {
-            int footerStart = 9;
-            ClearRegion(footerStart, 3); // Clear the 3 lines of the footer region
-            Console.SetCursorPosition(0, footerStart);
-
-            Console.WriteLine(_separator);
-
-            // Get the message string from our helper
-            string message = GenerateNotification(gameState, turnResult, turnCards);
             
-            Console.WriteLine(message.PadRight(_separator.Length));
+            // --- B. Draw Right Panel (Info) ---
+            string winsString = $"Wins: {wins} / {totalGames}";
+            string deckString = $"Deck: {deckCount} left";
 
-            Console.WriteLine(_separator);
+            SetPos(51, 4); Console.Write(CenterText(winsString, 15));
+            
+            if (state == GameState.Win)
+            {
+                SetPos(52, 6); Console.Write(CenterText("╔══════╗", 14));
+                SetPos(52, 7); Console.Write(CenterText("║ WIN! ║", 14));
+                SetPos(52, 8); Console.Write(CenterText("╚══════╝", 14));
+            }
+            else
+            {
+               DrawDeckImage(deckCount);  
+            }
+
+            SetPos(51, 9); Console.Write(CenterText(deckString, 15)); 
+
+            // --- C. Draw Rules (if in rules state) ---
+            if (state == GameState.ViewingRules)
+            {
+                // --- THIS IS THE FIX ---
+                // Clear the board area
+                string blank = "                                               "; // 47 chars
+                SetPos(2, 6); Console.Write(blank);
+                SetPos(2, 7); Console.Write(blank);
+                SetPos(2, 8); Console.Write(blank);
+                
+                // Use CenterText instead of manual spacing
+                switch (rulesPage)
+                {
+                    case 1:
+                        SetPos(2, 6); Console.Write(CenterText("Select cards to create a Pair or Trio", 47));
+                        SetPos(2, 7); Console.Write(CenterText("and remove them from the game board.", 47));
+                        break;
+                    case 2:
+                        SetPos(2, 6); Console.Write(CenterText("A Pair can be made when you select two", 47));
+                        SetPos(2, 7); Console.Write(CenterText("cards from A-10 that add up to Eleven.", 47));
+                        break;
+                    case 3:
+                        SetPos(2, 6); Console.Write(CenterText("A Trio can only be made by selecting the", 47));
+                        SetPos(2, 7); Console.Write(CenterText("Jack, Queen, and King cards together.", 47));
+                        break;
+                    case 4:
+                        SetPos(2, 6); Console.Write(CenterText("Successfully remove every card from the", 47));
+                        SetPos(2, 7); Console.Write(CenterText("game board and you Win!", 47));
+                        break;
+                }
+                SetPos(2, 9); Console.Write(CenterText($"[←] {rulesPage}/4 [→]", 47));
+                // --- END FIX ---
+            }       
         }
 
-        // Draws the final "Thanks for playing" screen
+        // --- Public Main Draw Method ---
+        
+        public void DrawGameScreen(
+            GameState state,
+            int deckCount, 
+            int wins, 
+            int totalGames, 
+            IReadOnlyList<Card?> cards, 
+            IReadOnlyList<int> selectedIndices, 
+            TurnResult turnResult, 
+            IReadOnlyList<Card> turnCards,
+            int currentRulesPage 
+            )
+        {
+            // 1. Draw Static Header
+            DrawHeaderBanner();
+            
+            // 2. Draw Static Frame
+            DrawStaticFrame();
+            
+            // 3. Draw all dynamic content into the frame
+            DrawDynamicContent(
+                state, deckCount, wins, totalGames,
+                cards, selectedIndices, turnResult, turnCards,
+                currentRulesPage
+            );
+
+            // Set the cursor out of the way at the bottom
+            SetPos(0, 13);
+        }
+
+        // This is the final screen.
         public void ShowGameSummary(int wins, int totalGames)
         {
             Console.CursorVisible = true;

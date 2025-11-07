@@ -23,7 +23,7 @@ namespace Elevens
         public Board Board { get; }
         public int GamesPlayed { get; private set; }
         public int GamesWon { get; private set; }
-
+        public int CurrentRulesPage { get; private set; }
         public IReadOnlyList<int> SelectedSlots
         {
             get { return _selectedSlots; }
@@ -49,6 +49,7 @@ namespace Elevens
             GamesWon = 0;
             CurrentState = GameState.Initializing;
             CurrentTurnResult = TurnResult.None;
+            CurrentRulesPage = 1;
         }
 
         // --- Public Methods ---
@@ -205,6 +206,23 @@ namespace Elevens
             {
                 Board.PlaceCardAt(i, Deck.Deal());
             }
+        }
+
+        // Changes the current rules page, clamping it between 1 and 3
+        public void ChangeRulesPage(int direction)
+        {
+            int newPage = CurrentRulesPage + direction;
+
+            if (newPage < 1)
+            {
+                newPage = 4; 
+            }
+            if (newPage > 4)
+            {
+                newPage = 1; 
+            }
+            
+            CurrentRulesPage = newPage;
         }
     }
 }

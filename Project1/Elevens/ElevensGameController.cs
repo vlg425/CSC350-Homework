@@ -40,7 +40,10 @@ namespace Elevens
                 }
                 catch (Exception) { /* Ignored */ }
             }
-            
+
+            // Clears console before drawing
+            Console.Clear();
+
             // --- Main Game Loop ---
             while (_game.CurrentState != GameState.Exiting)
             {
@@ -79,6 +82,14 @@ namespace Elevens
                     HandlePlayerTurn();
                     break;
 
+                case GameState.ViewingRules:
+                    HandleRulesInput();
+                    break;
+                
+                case GameState.ConfirmQuit:
+                    HandleQuitInput();
+                    break;
+            
                 // When the game ends, wait for (Y/N) input
                 case GameState.Win:
                 case GameState.Loss:
@@ -104,8 +115,12 @@ namespace Elevens
             // 2. Process Input
             switch (key)
             {
-                case ConsoleKey.Q: 
-                    _game.SetState(GameState.Exiting);
+                case ConsoleKey.R:
+                    _game.SetState(GameState.ViewingRules);
+                    break;
+
+                case ConsoleKey.Q:
+                    _game.SetState(GameState.ConfirmQuit);
                     break;
 
                 case ConsoleKey.Enter:
@@ -113,17 +128,29 @@ namespace Elevens
                     break;
 
                 // Top row number keys
-                case ConsoleKey.D1: case ConsoleKey.D2: case ConsoleKey.D3:
-                case ConsoleKey.D4: case ConsoleKey.D5: case ConsoleKey.D6:
-                case ConsoleKey.D7: case ConsoleKey.D8: case ConsoleKey.D9:
+                case ConsoleKey.D1:
+                case ConsoleKey.D2:
+                case ConsoleKey.D3:
+                case ConsoleKey.D4:
+                case ConsoleKey.D5:
+                case ConsoleKey.D6:
+                case ConsoleKey.D7:
+                case ConsoleKey.D8:
+                case ConsoleKey.D9:
                     // '1' (49) - '0' (48) = 1
                     _game.ToggleSelection(key - ConsoleKey.D0);
                     break;
 
                 // Numpad keys
-                case ConsoleKey.NumPad1: case ConsoleKey.NumPad2: case ConsoleKey.NumPad3:
-                case ConsoleKey.NumPad4: case ConsoleKey.NumPad5: case ConsoleKey.NumPad6:
-                case ConsoleKey.NumPad7: case ConsoleKey.NumPad8: case ConsoleKey.NumPad9:
+                case ConsoleKey.NumPad1:
+                case ConsoleKey.NumPad2:
+                case ConsoleKey.NumPad3:
+                case ConsoleKey.NumPad4:
+                case ConsoleKey.NumPad5:
+                case ConsoleKey.NumPad6:
+                case ConsoleKey.NumPad7:
+                case ConsoleKey.NumPad8:
+                case ConsoleKey.NumPad9:
                     // 'NumPad1' (97) - 'NumPad0' (96) = 1
                     _game.ToggleSelection(key - ConsoleKey.NumPad0);
                     break;
@@ -136,6 +163,44 @@ namespace Elevens
             }
         }
 
+        // Handles input for the "Confirm Quit" screen
+        private void HandleQuitInput()
+        {
+            var key = Console.ReadKey(true).Key;
+
+            if (key == ConsoleKey.Y)
+            {
+                _game.SetState(GameState.Exiting);
+            }
+            else if (key == ConsoleKey.N)
+            {
+                _game.SetState(GameState.PlayerTurn); // Go back to the game
+            }
+            // Any other key does nothing, forcing a Y/N answer
+        }
+
+        // --- ADD THIS NEW METHOD ---
+        // Handles input for the "Rules" screen
+        private void HandleRulesInput()
+        {
+            var key = Console.ReadKey(true).Key;
+
+            switch (key)
+            {
+                case ConsoleKey.R:
+                    _game.SetState(GameState.PlayerTurn); // Go back to the game
+                    break;
+
+                case ConsoleKey.LeftArrow:
+                    _game.ChangeRulesPage(-1); // Go to previous page
+                    break;
+
+                case ConsoleKey.RightArrow:
+                    _game.ChangeRulesPage(1); // Go to next page
+                    break;
+            }
+        }
+        
         // Handles user input on the "Game Over" screen.
         private void HandlePlayAgainInput()
         {
@@ -156,16 +221,19 @@ namespace Elevens
         // Renamed from RenderFrame.
         private void DrawFrame()
         {
-            Console.Clear(); // Clear screen to prevent artifacts
-            
-            // 1. Draw Header
-            _display.DrawHeader(_game.Deck.Count, _game.GamesWon, _game.GamesPlayed);
-            
-            // 2. Draw Board
-            _display.DrawBoard(_game.Board.CardsOnBoard, _game.SelectedSlots);
-            
-            // 3. Draw Footer
-            _display.DrawFooter(_game.CurrentState, _game.CurrentTurnResult, _game.CurrentTurnCards);
+            Console.Clear();
+
+            _display.DrawGameScreen(
+                _game.CurrentState,
+                _game.Deck.Count,
+                _game.GamesWon,
+                _game.GamesPlayed,
+                _game.Board.CardsOnBoard,
+                _game.SelectedSlots,
+                _game.CurrentTurnResult,
+                _game.CurrentTurnCards,
+                _game.CurrentRulesPage
+            );
         }
     }
 }

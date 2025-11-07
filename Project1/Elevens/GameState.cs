@@ -16,6 +16,10 @@ namespace Elevens
         Win,
         // Game just ended in a loss
         Loss,
+        // do you want to quit...
+        ConfirmQuit,
+        // game rules open
+        ViewingRules,
         // Waiting for (Y/N) input (replaces Win/Loss state)
         GameOver,
         // Player pressed 'Q'
